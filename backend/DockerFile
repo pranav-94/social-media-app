@@ -1,12 +1,25 @@
+```dockerfile
 FROM node:20-alpine
 
 WORKDIR /app
 
-COPY ..
+# Copy package.json and package-lock.json first to leverage Docker cache
+# This allows Docker to reuse the npm install layer if only code changes
+COPY package*.json ./
 
+# Install dependencies
 RUN npm install
+
+# Copy the rest of the application code
+# Ensure you have a .dockerignore file in the root of your project
+# to exclude node_modules, .git, etc.
+COPY . .
+
+# Run the build command (if necessary for runtime)
+# If build generates files needed by index.js, this must run before CMD
 RUN npm run build
 
 EXPOSE 3000
 
 CMD ["node" , "index.js"]
+```
